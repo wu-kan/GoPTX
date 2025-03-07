@@ -1,6 +1,6 @@
 # GoPTX
 
-GoPTX fuses two GPU concurrent kernels at PTX level to improve ILP. For more details, you can see our DAC'25 paper "GoPTX: Fine-grained GPU Kernel Fusion by PTX Level Instruction Flow Weaving". The source code will come soon.
+GoPTX fuses two GPU concurrent kernels at PTX level to improve ILP. For more details, you can see our DAC'25 paper "GoPTX: Fine-grained GPU Kernel Fusion by PTX Level Instruction Flow Weaving". The source code and docker image will come soon.
 
 ## Quick start
 
@@ -32,7 +32,7 @@ docker run \
   --gpus "device=0" \
   --name goptx \
   -it \
-  wukan0621/goptx sh
+  wukan0621/goptx:v0.0.1-dac25 sh
 cd /GoPTX_nvcc/utils
 GoPTX_link a.ptx b.ptx _sa _sb > c.ptx
 GoPTX_merge c.ptx \$1_\$2_merged namea nameb > d.ptx
@@ -91,7 +91,7 @@ docker run \
   --runtime=nvidia \
   --gpus "device=0" \
   --name goptx \
-  wukan0621/goptx
+  wukan0621/goptx:v0.0.1-dac25
 docker cp goptx:/root/GoPTX_nvcc/utils .
 ```
 
