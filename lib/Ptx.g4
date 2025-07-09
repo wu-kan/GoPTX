@@ -363,6 +363,7 @@ loc
 linking_directive
     : extern_
     | visible
+    | weak
     ;
 
 extern_
@@ -371,6 +372,10 @@ extern_
 
 visible
     : K_VISIBLE identifier_decl
+    ;
+
+weak
+    : K_WEAK identifier_decl
     ;
 
 identifier_decl
@@ -420,12 +425,14 @@ opcode
     | KI_AND
     | KI_ATOM
     | KI_BAR
+    | KI_BARRIER
     | KI_BFE
     | KI_BFI
     | KI_BFIND
     | KI_BRA
     | KI_BREV
     | KI_BRKPT
+    | KI_BRX
     | KI_CALL
     | KI_CLZ
     | KI_CNOT
@@ -493,6 +500,7 @@ opcode
     | KI_VSUB
     | KI_VOTE
     | KI_XOR
+    | KI_WMMA
     ;
 
 variable_declarator_with_initializer
@@ -624,6 +632,7 @@ instruction_aux
         | i_bra
         | i_brev
         | i_brkpt
+        | i_brx
         | i_call
         | i_clz
         | i_cnot
@@ -664,6 +673,7 @@ instruction_aux
         | i_selp
         | i_set
         | i_setp
+        | i_shfl
         | i_shl
         | i_shr
         | i_sin
@@ -690,6 +700,7 @@ instruction_aux
         | i_vshr
         | i_vsub
         | i_vote
+        | i_wmma
         | i_xor
     )
     ;
@@ -835,6 +846,22 @@ i_bar4_opr
     : opr T_COMMA opr (T_COMMA opr)? T_COMMA T_NOT? opr
     ;
 
+i_barrier
+    : i_barrier1
+    ;
+
+i_barrier1
+    : i = KI_BARRIER t = i_barrier1_type o = i_barrier1_opr
+    ;
+
+i_barrier1_type
+    : K_SYNC K_ALIGNED?
+    ;
+
+i_barrier1_opr
+    : opr (T_COMMA opr)?
+    ;
+
 i_bfe
     : i = KI_BFE t = i_bfe_type o = i_bfe_opr
     ;
@@ -898,6 +925,15 @@ i_brev_opr
 
 i_brkpt
     : i = KI_BRKPT
+    ;
+
+i_brx
+    : KI_BRX K_IDX i_brx_type opr_register T_COMMA opr_label
+    ;
+
+i_brx_type
+    : K_UNI
+    |
     ;
 
 i_call
@@ -1093,7 +1129,7 @@ i_ld
 i_ld_type
     : (
         (
-            (K_CONST | K_GLOBAL | K_LOCAL | K_PARAM | K_SHARED)? (K_CA | K_CG | K_CS | K_LU | K_CV)? (
+            (K_CONST | K_GLOBAL | K_LOCAL | K_PARAM | K_SHARED)? (K_CA | K_CG | K_CS | K_LU | K_CV)? K_NC? (
                 K_B8
                 | K_B16
                 | K_B32
@@ -1111,7 +1147,7 @@ i_ld_type
             )
         )
         | (
-            (K_CONST | K_GLOBAL | K_LOCAL | K_PARAM | K_SHARED)? (K_CA | K_CG | K_CS | K_LU | K_CV)? (
+            (K_CONST | K_GLOBAL | K_LOCAL | K_PARAM | K_SHARED)? (K_CA | K_CG | K_CS | K_LU | K_CV)? K_NC? (
                 K_V2
                 | K_V4
             ) (
@@ -1733,6 +1769,19 @@ i_setp2_opr
     : opr T_COMMA opr T_COMMA opr T_COMMA T_NOT? opr
     ;
 
+i_shfl
+    : i = KI_SHFL K_SYNC K_DOWN t = i_shfl_type o = i_shfl_opr
+    ;
+
+i_shfl_type
+    : (K_B16 | K_B32 | K_B64)
+    ;
+
+i_shfl_opr
+    : opr5
+    | opr T_OR opr T_COMMA opr T_COMMA opr T_COMMA opr T_COMMA opr
+    ;
+
 i_shl
     : i = KI_SHL t = i_shl_type o = i_shl_opr
     ;
@@ -2113,6 +2162,12 @@ i_vote_opr
     : opr T_COMMA T_NOT? opr
     ;
 
+i_wmma
+    : KI_WMMA K_LOAD ( K_A | K_B | K_C | K_D ) K_SYNC K_ALIGNED ( K_ROW | K_COL ) K_M16N16K16 K_GLOBAL? ( K_F16 | K_F32 ) opr T_COMMA T_OB opr T_CB T_COMMA opr
+    | KI_WMMA K_STORE ( K_A | K_B | K_C | K_D ) K_SYNC K_ALIGNED ( K_ROW | K_COL ) K_M16N16K16 K_GLOBAL? ( K_F16 | K_F32 ) T_OB opr T_CB T_COMMA opr T_COMMA opr
+    | KI_WMMA K_MMA K_SYNC K_ALIGNED ( K_ROW | K_COL ) ( K_ROW | K_COL ) K_M16N16K16 ( K_F16 | K_F32 ) ( K_F16 | K_F32 ) opr4
+    ;
+
 i_xor
     : i = KI_XOR t = i_xor_type o = i_xor_opr
     ;
@@ -2350,6 +2405,10 @@ KI_BAR
     : 'bar'
     ;
 
+KI_BARRIER
+    : 'barrier'
+    ;
+
 KI_BFE
     : 'bfe'
     ;
@@ -2372,6 +2431,10 @@ KI_BREV
 
 KI_BRKPT
     : 'brkpt'
+    ;
+
+KI_BRX
+    : 'brx'
     ;
 
 KI_CALL
@@ -2535,6 +2598,10 @@ KI_SET
     : 'set'
     ;
 
+KI_SHFL
+    : 'shfl'
+    ;
+
 KI_SHL
     : 'shl'
     ;
@@ -2637,6 +2704,10 @@ KI_VSHR
 
 KI_VSUB
     : 'vsub'
+    ;
+
+KI_WMMA
+    : 'wmma'
     ;
 
 KI_XOR
@@ -2920,6 +2991,10 @@ K_TARGET
     : '.target'
     ;
 
+K_STORE
+    : '.store'
+    ;
+
 K_SYS
     : '.sys'
     ;
@@ -3032,6 +3107,10 @@ K_RC16
     : '.rc16'
     ;
 
+K_ROW
+    : '.row'
+    ;
+
 K_PRED
     : '.pred'
     ;
@@ -3104,6 +3183,15 @@ K_NAN
     : '.nan'
     ;
 
+K_NC
+    : '.nc'
+    ;
+    
+
+K_M16N16K16
+    : '.m16n16k16'
+    ;
+
 K_MINNCTAPERSM
     : '.minnctapersm'
     ;
@@ -3128,6 +3216,10 @@ K_MAX
     : '.max'
     ;
 
+K_MMA
+    : '.mma'
+    ;
+
 K_LU
     : '.lu'
     ;
@@ -3142,6 +3234,10 @@ K_LT
 
 K_LS
     : '.ls'
+    ;
+
+K_LOAD
+    : '.load'
     ;
 
 K_LOCAL
@@ -3170,6 +3266,10 @@ K_L2
 
 K_L1
     : '.L1'
+    ;
+
+K_IDX
+    : '.idx'
     ;
 
 K_INFINITE
@@ -3288,6 +3388,10 @@ K_DWARF
     : '@@DWARF' .*? ('\n' | '\r')
     ;
 
+K_DOWN
+    : '.down'
+    ;
+
 K_DEPTH
     : '.depth'
     ;
@@ -3306,6 +3410,10 @@ K_CTA
 
 K_CS
     : '.cs'
+    ;
+
+K_COL
+    : '.col'
     ;
 
 K_CONST
@@ -3404,6 +3512,10 @@ K_ALIGN
     : '.align'
     ;
 
+K_ALIGNED
+    : '.aligned'
+    ;
+
 K_ADDR_MODE_2
     : '.addr_mode_2'
     ;
@@ -3454,6 +3566,16 @@ K_G
 
 K_B
     : '.b'
+    ;
+
+K_C : '.c'
+    ;
+
+K_D : '.d'
+    ;
+
+K_WEAK
+    : '.weak'
     ;
 
 COMMENT
