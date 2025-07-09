@@ -1,0 +1,6 @@
+[submodule "test/WuKernel/third_party/EmbedPTX"]
+	path = test/WuKernel/third_party/EmbedPTX
+	url = https://github.com/wu-kan/EmbedPTX
+[submodule "test/third_party/wuk_cupti_wrapper"]
+	path = test/third_party/wuk_cupti_wrapper
+	url = https://github.com/wu-kan/wuk_cupti_wrapper

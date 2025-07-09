@@ -1,6 +1,6 @@
 # GoPTX
 
-GoPTX fuses two GPU concurrent kernels at PTX level to improve ILP. For more details, you can see our DAC'25 paper "GoPTX: Fine-grained GPU Kernel Fusion by PTX Level Instruction Flow Weaving". The source code and docker image will come soon.
+GoPTX fuses two GPU concurrent kernels at PTX level to improve ILP and inter-SM resource sharing. For more details, you can see our DAC'25 paper "GoPTX: Fine-grained GPU Kernel Fusion by PTX-level Instruction Flow Weaving". The source code and docker image will come soon. More resources are available at <https://wu-kan.cn/2025/06/25/DAC25-GoPTX/>.
 
 ## Quick start
 
@@ -84,7 +84,7 @@ st.global.f32[ %rd_sbs2], %f_sbs2;
 }
 ```
 
-Get the results of the DAC'25 paper "GoPTX: Fine-grained GPU Kernel Fusion by PTX Level Instruction Flow Weaving". It requires a GPU of architecture sm_80 or sm_90 (we use A100-PCIE-40GB and have not tuned for other devices). For other architecture, you should rebuild from the source and specify your `$CUDAARCHS`. Our result is available at `/root/GoPTX_nvcc/utils/results/results.adaptive.html`.
+Get the results of the DAC'25 paper "GoPTX: Fine-grained GPU Kernel Fusion by PTX-level Instruction Flow Weaving". It requires a GPU of architecture sm_80 or sm_90 (we use A100-PCIE-40GB and have not tuned for other devices). For other architecture, you should rebuild from the source and specify your `$CUDAARCHS`. Our result is available at `/root/GoPTX_nvcc/utils/results/results.adaptive.html`.
 
 ```shell
 docker run \
